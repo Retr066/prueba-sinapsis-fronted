@@ -6,13 +6,12 @@ import { NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDatepickerModule, NgbP
 
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, NgbPaginationModule, FormsModule,NgbDatepickerModule],
-  providers: [DecimalPipe],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
-  styles: `
+    selector: 'app-home',
+    imports: [CommonModule, NgbPaginationModule, FormsModule, NgbDatepickerModule],
+    providers: [DecimalPipe],
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.css',
+    styles: `
   		.dp-hidden {
 			width: 0;
 			margin: 0;
