@@ -1,26 +1,22 @@
 # SipnasisFronted
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.1.
+Este es el frotend para gestionar campañas de marketing. Proporciona una interfaz para crear campañas, enviar mensajes, listar campañas.
 
-## Development server
+## Configuración
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+### 1. Instalar dependencias
 
-## Code scaffolding
+Ejecuta el siguiente comando para instalar las dependencias del proyecto:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```
+npm install
+```
 
-## Build
+Despues de intalar las dependencias ejecutar este comando para levantar el proyecto:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```
+npm run start
+```
 
 ## Further help
 
