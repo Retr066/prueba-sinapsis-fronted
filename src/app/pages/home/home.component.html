@@ -90,7 +90,7 @@
                             <th scope="col">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody *ngIf="campaigns.length > 0; else noCampaigns">
                         @for (campaign of campaigns; track campaign.id) {
                         <tr>
                             <th scope="row">{{ campaign.id }}</th>
@@ -121,6 +121,13 @@
                         </tr>
                         }
                     </tbody>
+                             
+                      <!-- Mensaje cuando no hay campañas -->
+                      <ng-template #noCampaigns>
+                        <tr >
+                          <td colspan="8" class="text-center text-black">No hay campañas registradas aún.</td>
+                        </tr>
+                      </ng-template>
                 </table>
             </div>
         </div>
