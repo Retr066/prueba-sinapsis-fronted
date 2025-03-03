@@ -1,1 +1,90 @@
-<p>campaign-modal-form works!</p>
+<div class="modal-header">
+  <h4 class="modal-title">Crear Nueva Campaña</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+<div class="modal-body">
+  <form [formGroup]="campaignForm" (ngSubmit)="onSubmit()">
+
+    <div class="mb-3">
+      <label for="usuario" class="form-label">Usuario</label>
+      <select class="form-select" id="user_id" formControlName="user_id" name="user_id" required>
+        <option value="" selected disabled>Seleccione un usuario</option>
+        <option *ngFor="let user of users" [value]="user.id">{{user.username}}</option>
+      </select>
+      <div
+        *ngIf="campaignForm.get('user_id')?.invalid && (campaignForm.get('user_id')?.dirty || campaignForm.get('user_id')?.touched)">
+        <div class="text-danger" *ngIf="control.user_id.errors?.['required']">
+          Usuario es requerido.
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="name" class="form-label">Nombre</label>
+      <input type="text" class="form-control" id="name" name="name" formControlName="name" required>
+      <div
+        *ngIf="campaignForm.get('name')?.invalid && (campaignForm.get('name')?.dirty || campaignForm.get('name')?.touched)">
+        <div class="text-danger" *ngIf="control.name.errors?.['required']">
+          Nombre es requerido.
+        </div>
+        <div class="text-danger" *ngIf="control.name.errors?.['minlength']">
+          Nombre debe tener al menos 3 caracteres.
+        </div>
+
+      </div>
+
+    </div>
+    <div class="mb-3">
+      <label for="process_date" class="form-label">Fecha</label>
+      <input type="date" class="form-control" id="process_date" formControlName="process_date" name="process_date"
+        required>
+      <div
+        *ngIf="campaignForm.get('process_date')?.invalid && (campaignForm.get('process_date')?.dirty || campaignForm.get('process_date')?.touched)">
+        <div class="text-danger" *ngIf="control.process_date.errors?.['required']">
+          Fecha es requerida.
+        </div>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="process_hour" class="form-label">Hora</label>
+      <input type="time" class="form-control" id="process_hour" formControlName="process_hour" name="process_hour"
+        required>
+      <div
+        *ngIf="campaignForm.get('process_hour')?.invalid && (campaignForm.get('process_hour')?.dirty || campaignForm.get('process_hour')?.touched)">
+        <div class="text-danger" *ngIf="control.process_hour.errors?.['required']">
+          Hora es requerida.
+        </div>
+      </div>
+
+    </div>
+    <div class="mb-3">
+      <label for="phone_list" class="form-label">Lista de Teléfonos</label>
+      <textarea class="form-control" id="phone_list" formControlName="phone_list" name="phone_list"
+        appPhoneText></textarea>
+      <div
+        *ngIf="campaignForm.get('phone_list')?.invalid && (campaignForm.get('phone_list')?.dirty || campaignForm.get('phone_list')?.touched)">
+        <div class="text-danger" *ngIf="control.phone_list.errors?.['required']">
+          Lista de teléfonos es requerida.
+        </div>
+        <div class="text-danger" *ngIf="control.phone_list.errors?.['phoneText']">
+          Lista de teléfonos debe ser de 9 dígitos y separados por coma.
+        </div>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="message_text" class="form-label">Mensaje</label>
+      <textarea class="form-control" id="message_text" formControlName="message_text" name="message_text"
+        required></textarea>
+      <div
+        *ngIf="campaignForm.get('message_text')?.invalid && (campaignForm.get('message_text')?.dirty || campaignForm.get('message_text')?.touched)">
+        <div class="text-danger" *ngIf="control.message_text.errors?.['required']">
+          Mensaje es requerido.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss()">Cancelar</button>
+      <button type="submit" class="btn btn-primary">Crear Campaña</button>
+    </div>
+  </form>
+</div>

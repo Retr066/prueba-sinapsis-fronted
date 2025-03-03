@@ -1,8 +1,10 @@
+import { User } from "./user.model";
+
 export interface Campaign {
     id: number;
-    user_id: number;
+    user: User;
     name: string;
-    process_date: Date;
+    process_date: string;
     process_hour: string;
     process_status: number;
     phone_list: string;

@@ -1,17 +1,21 @@
-import { CommonModule, DecimalPipe, JsonPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, DatePipe, DecimalPipe, JsonPipe } from '@angular/common';
+import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDatepickerModule, NgbModal, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { Campaign } from '../../models/campaign.model';
+import { CampaignService } from '../../services/campaign.service';
+import { ProcessStatusPipe } from '../../pipes/process-status.pipe';
+import { CampaignModalFormComponent } from '../../components/campaign-modal-form/campaign-modal-form.component';
+import { Subscription } from 'rxjs';
+import { AlertsComponent } from "../../components/alerts/alerts.component";
 
 
 @Component({
-    selector: 'app-home',
-    imports: [CommonModule, NgbPaginationModule, FormsModule, NgbDatepickerModule],
-    providers: [DecimalPipe],
-    templateUrl: './home.component.html',
-    styleUrl: './home.component.css',
-    styles: `
+  selector: 'app-home',
+  imports: [CommonModule, NgbPaginationModule, FormsModule, ProcessStatusPipe, NgbDatepickerModule, AlertsComponent],
+  providers: [DecimalPipe, DatePipe],
+  templateUrl: './home.component.html',
+  styles: `
   		.dp-hidden {
 			width: 0;
 			margin: 0;
@@ -38,7 +42,7 @@ import { NgbCalendar, NgbDate, NgbDateParserFormatter, NgbDatepickerModule, NgbP
 		}
   `
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
 
   calendar = inject(NgbCalendar);
   formatter = inject(NgbDateParserFormatter);
@@ -47,85 +51,134 @@ export class HomeComponent {
   toDate: NgbDate | null = this.calendar.getNext(this.fromDate, 'd', 10);
   hoveredDate: NgbDate | null = null;
 
-  countries = [
-    {
-      id: 1,
-      name: 'India',
-      area: 1234567890,
-      population: 1380004385,
-      flag: 'Flag_of_India.png'
-    },
-    {
-      id: 2,
-      name: 'United States',
-      area: 9833520,
-      population: 331002651,
-      flag: 'Flag_of_the_United_States.png'
-    },
-    {
-      id: 3,
-      name: 'United Kingdom',
-      area: 242495,
-      population: 67886011,
-      flag: 'Flag_of_the_United_Kingdom.png'
+  campaigns: Campaign[] = []
+  campaignCreatedSubscription: Subscription | undefined;
 
-    },
-    {
-      id: 4,
-      name: 'Australia',
-      area: 7692024,
-      population: 25499884,
-      flag: 'Flag_of_Australia.png'
-    }
-  ]
+  @ViewChild('alerts') alerts!: AlertsComponent; 
+
+  constructor(
+    private readonly campaignService: CampaignService,
+    private readonly modalService: NgbModal,
+  ) { }
+
+  ngOnInit(): void {
+    this.loadCampaigns();
+  }
+
+ 
 
   pagination = {
     page: 1,
     pageSize: 10,
-    collectionSize: this.countries.length
+    collectionSize: 20
   }
 
-  refreshCountries() {
-    this.countries = this.countries.map((country, i) => {
-      const { id, ...rest } = country;
-      return { id: i + 1, ...rest };
+  openCreateCampaignModal(): void {
+    const modalRef = this.modalService.open(CampaignModalFormComponent);
+
+    if (this.campaignCreatedSubscription) {
+      this.campaignCreatedSubscription.unsubscribe();
+    }
+  
+
+    this.campaignCreatedSubscription = modalRef.componentInstance.campaignCreated.subscribe((campaign: Campaign) => {
+      this.campaignService.createCampaign(campaign).subscribe(
+        {
+          next: (createdCampaign) => {
+            // llamar el componente de alertas
+            this.alerts.showAlert(createdCampaign.message, 'success');
+          },
+          error: (error) => {
+            console.log('Error', error);
+            this.alerts.showAlert(error.error.error, 'danger');
+          },
+          complete: () => {
+            this.loadCampaigns();
+          }
+        }
+      );
     });
   }
 
+
+  loadCampaigns() {
+    this.campaignService.getCampaigns().subscribe({
+      next: (campaigns) => {
+        console.log('Campaigns', campaigns);
+        this.campaigns = campaigns;
+      },
+      error: (error) => {
+        this.alerts.showAlert(error.error.message, 'danger');
+      },
+      complete: () => {
+        console.log('Completed');
+      }
+    });
+  }
+
+  searchCampaigns() {
+    this.campaignService.getCampaigns(this.formatter.format(this.fromDate), this.formatter.format(this.toDate)).subscribe({
+      next: (campaigns) => {
+        this.campaigns = campaigns;
+      },
+      error: (error) => {
+        this.alerts.showAlert(error.error.message, 'danger');
+      },
+      complete: () => {
+        console.log('Completed');
+      }
+    });
+  }
+
+  simulateCampaign(id: number) {
+    this.campaignService.simulateCampaign(id).subscribe({
+      next: (response) => {
+        this.alerts.showAlert(response.message, 'success');
+      },
+      error: (error) => {
+        this.alerts.showAlert(error.error.message, 'danger');
+      },
+      complete: () => {
+        console.log('Completed');
+      }
+    });
+  }
+
+
   onDateSelection(date: NgbDate) {
-		if (!this.fromDate && !this.toDate) {
-			this.fromDate = date;
-		} else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
-			this.toDate = date;
-		} else {
-			this.toDate = null;
-			this.fromDate = date;
-		}
-	}
+    if (!this.fromDate && !this.toDate) {
+      this.fromDate = date;
+    } else if (this.fromDate && !this.toDate && date.after(this.fromDate)) {
+      this.toDate = date;
+    } else {
+      this.toDate = null;
+      this.fromDate = date;
+    }
+  }
 
   isHovered(date: NgbDate) {
-		return (
-			this.fromDate && !this.toDate && this.hoveredDate && date.after(this.fromDate) && date.before(this.hoveredDate)
-		);
-	}
+    return (
+      this.fromDate && !this.toDate && this.hoveredDate && date.after(this.fromDate) && date.before(this.hoveredDate)
+    );
+  }
 
-	isInside(date: NgbDate) {
-		return this.toDate && date.after(this.fromDate) && date.before(this.toDate);
-	}
+  isInside(date: NgbDate) {
+    return this.toDate && date.after(this.fromDate) && date.before(this.toDate);
+  }
 
-	isRange(date: NgbDate) {
-		return (
-			date.equals(this.fromDate) ||
-			(this.toDate && date.equals(this.toDate)) ||
-			this.isInside(date) ||
-			this.isHovered(date)
-		);
-	}
+  isRange(date: NgbDate) {
+    return (
+      date.equals(this.fromDate) ||
+      (this.toDate && date.equals(this.toDate)) ||
+      this.isInside(date) ||
+      this.isHovered(date)
+    );
+  }
 
   validateInput(currentValue: NgbDate | null, input: string): NgbDate | null {
-		const parsed = this.formatter.parse(input);
-		return parsed && this.calendar.isValid(NgbDate.from(parsed)) ? NgbDate.from(parsed) : currentValue;
-	}
+    const parsed = this.formatter.parse(input);
+    return parsed && this.calendar.isValid(NgbDate.from(parsed)) ? NgbDate.from(parsed) : currentValue;
+  }
 
 
 }
